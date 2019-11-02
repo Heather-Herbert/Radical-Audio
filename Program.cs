@@ -11,20 +11,26 @@ namespace TTS
     {
         static async Task Main(string[] args)
         {
+            await openDocument(args[0]);
+        }
+    
+        static async Task openDocument(string filename)
+        {
+            string text = File.ReadAllText(filename);
+            if (text.Length > 4000) {
+                throw new Exception("File too long");
+            }
+            await SayAndDownload(text, filename);
+        }
 
-            var builder = new ConfigurationBuilder()
+        static async Task SayAndDownload(string text, string outfilename, string voice = "en-US, GuyNeural")
+        {
+                        var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
             IConfigurationRoot configuration = builder.Build();
-
-            Console.WriteLine(configuration.GetConnectionString("Storage"));
-
-            // Prompts the user to input text for TTS conversion
-            Console.Write("What would you like to convert to speech? ");
-            string text = Console.ReadLine();
-
-            // Gets an access token
+           // Gets an access token
             string accessToken;
             Console.WriteLine("Attempting token exchange. Please wait...\n");
 
@@ -40,7 +46,7 @@ namespace TTS
                 Console.WriteLine("Successfully obtained an access token. \n");
 
                 string body = @"<speak version='1.0' xmlns='https://www.w3.org/2001/10/synthesis' xml:lang='en-US'>
-                     <voice name='Microsoft Server Speech Text to Speech Voice (en-US, GuyNeural)'>" +
+                     <voice name='Microsoft Server Speech Text to Speech Voice (" + voice + ")'>" +
                     text + "</voice></speak>";
 
                 using (var client = new HttpClient())
@@ -89,5 +95,7 @@ namespace TTS
                 return;
             }
         }
+
+
     }
 }
