@@ -1,0 +1,10 @@
+en-US, GuyNeural
+Radical audio's presents {Book name}
+
+en-US, JessaNeural
+{Book}
+
+
+
+en-US, GuyNeural
+Thank you for listing to, Radical audio's reading of {Book name}. We hope you've enjoyed this and our other works
