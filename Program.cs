@@ -17,15 +17,30 @@ namespace TTS
         static async Task openDocument(string filename)
         {
             string text = File.ReadAllText(filename);
+            
             if (text.Length > 4000) {
-                throw new Exception("File too long");
+                string[] sentences = text.Split(".");
+                StringBuilder bitsOfText = new StringBuilder();
+                int counter = 0;
+
+                foreach (string parts in sentences)
+                {
+                    if ((bitsOfText.Length + parts.Length) > 4000 ){
+                        await SayAndDownload(bitsOfText.ToString(), counter.ToString() + filename, "en-US, JessaNeural");
+                        bitsOfText.Clear();
+                        counter++;
+                    }
+                    bitsOfText.Append(parts);
+                }
+                await SayAndDownload(bitsOfText.ToString(), counter.ToString() + filename, "en-US, JessaNeural");
+            } else {
+                await SayAndDownload(text, filename, "en-US, JessaNeural");
             }
-            await SayAndDownload(text, filename);
         }
 
         static async Task SayAndDownload(string text, string outfilename, string voice = "en-US, GuyNeural")
         {
-                        var builder = new ConfigurationBuilder()
+            var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
@@ -63,7 +78,7 @@ namespace TTS
                         request.Headers.Add("Authorization", "Bearer " + accessToken);
                         request.Headers.Add("Connection", "Keep-Alive");
                         // Update your resource name
-                        request.Headers.Add("User-Agent", "YOUR_RESOURCE_NAME");
+                        request.Headers.Add("User-Agent", "Radical Audio TTS");
                         request.Headers.Add("X-Microsoft-OutputFormat", "riff-24khz-16bit-mono-pcm");
                         // Create a request
                         Console.WriteLine("Calling the TTS service. Please wait... \n");
@@ -74,13 +89,12 @@ namespace TTS
                             using (var dataStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                             {
                                 Console.WriteLine("Your speech file is being written to file...");
-                                using (var fileStream = new FileStream(@"sample.wav", FileMode.Create, FileAccess.Write, FileShare.Write))
+                                using (var fileStream = new FileStream(outfilename + ".wav", FileMode.Create, FileAccess.Write, FileShare.Write))
                                 {
                                     await dataStream.CopyToAsync(fileStream).ConfigureAwait(false);
                                     fileStream.Close();
                                 }
-                                Console.WriteLine("\nYour file is ready. Press any key to exit.");
-                                Console.ReadLine();
+                                Console.WriteLine("\nYour file " + outfilename + ".wav" + " is ready.");
                             }
                         }
                     }
