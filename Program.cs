@@ -16,12 +16,14 @@ namespace TTS
     
         static async Task openDocument(string filename)
         {
-            string text = File.ReadAllText(filename);
+            string text = File.ReadAllText(filename).Replace("’","'");
             
             if (text.Length > 4000) {
+
                 string[] sentences = text.Split(".");
                 StringBuilder bitsOfText = new StringBuilder();
                 int counter = 0;
+
 
                 foreach (string parts in sentences)
                 {
@@ -31,6 +33,7 @@ namespace TTS
                         counter++;
                     }
                     bitsOfText.Append(parts);
+                    bitsOfText.Append(". ");
                 }
                 await SayAndDownload(bitsOfText.ToString(), counter.ToString() + filename, "en-US, JessaNeural");
             } else {
