@@ -37,7 +37,7 @@ namespace TTS
                 }
                 await SayAndDownload(bitsOfText.ToString(), counter.ToString() + filename, "en-US, JessaNeural");
             } else {
-                await SayAndDownload(text, filename, "en-US, JessaNeural");
+                await SayAndDownload(text, filename);
             }
         }
 
